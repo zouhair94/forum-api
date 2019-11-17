@@ -4,7 +4,7 @@ const jsonWebToken = require('jsonwebtoken');
 const {  getBodyReq ,saltRounds } = require('../helpers/utils/utlis');
 const { sendEmail } = require('../helpers/utils/mailer');
 const uid = require('uid');
-
+const Role = require('../models/roles.model');
 
 const Authentication = (req,res) => {
 
@@ -46,23 +46,25 @@ const Authentication = (req,res) => {
 
 };
 
-const Signup = (req,res) => {
+const Signup = async (req,res) => {
     try {
         const arr = ['username','password','email','name','surname','birth'];
         const { body } = req;
         const requestObj = getBodyReq(body,arr);
+        const role =  await Role.findOne({ role: 'user'}).exec();
         bcrypt.genSalt(saltRounds,function(err,salt){
             if (err) return next(err);
             bcrypt.hash(uid(15), salt, function(err,hash){
                 if(err) return next(err);
                 requestObj.token = hash;
+                requestObj.role = role._id ;
                 const createUser = new User(requestObj);
                 createUser.save( async (err,user)=>{
                     if(err) return res.status(500).json(err.message);
                     await sendEmail(user.email,'forum activation email',`dear ${user.name} , in order to activate your account use the following Token ${hash}`);
-                    return res.json(200).json({message:`Account has been created , 
+                    return res.status(200).json({message:`Account has been created 
                 we have sent you a confirmation email to the adress: ${user.email}
-                `});
+               `});
                 });
             });
 
@@ -81,7 +83,7 @@ const Confirmation = (req,res) => {
                 if ( user ) {
                     user.state = true;
                     user.save((err)=>{
-                        if(err) => return res.status(501).json({err:err.message});
+                        if(err) return res.status(501).json({err:err.message});
                         return res.status(200).json({message:`account has been confirmed. `});
                     })
                 }
