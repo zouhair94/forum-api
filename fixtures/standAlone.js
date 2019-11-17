@@ -10,6 +10,7 @@ const addPermissions = require('./roleAndPermissions/permission.fixture');
 const Permission = require('../models/permissions.model');
 const role = require('../models/roles.model');
 const addRoles = require('./roleAndPermissions/role.fixture');
+const { createAdmin } = require('./users/users.fixtures');
 
 (async ()=>{
     try {
@@ -22,7 +23,7 @@ const addRoles = require('./roleAndPermissions/role.fixture');
         if(permissionsLength === 4) await addRoles(roleValues);
         const rolesLength = await role.countDocuments({}).exec();
         console.log(rolesLength);
-
+        await createAdmin();
 
 
     }catch (e) {

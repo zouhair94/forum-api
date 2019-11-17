@@ -2,19 +2,20 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
+const { saltRounds } = require('../helpers/utils/utlis');
 
-const saltRounds = 10;
 
 const userSchema = new Schema({
     id: Schema.Types.ObjectId,
     name: { type: String , required: true },
     surname: { type: String, required: true},
-    username: { type: String, required:true },
+    username: { type: String, required: true , unique: true},
+    email: { type: String, required: true , match: /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/, unique:true  },
     password: { type: String , required: true },
     birth: { type: String, required: true },
     state: { type: Boolean , default: false },
     role: { type: Schema.ObjectId , ref:'Role' },
-    token: String,
+    token: {type: String, unique: true },
     createdAt: { type: Date , default: Date.now() },
     updatedAt: Date
 });
