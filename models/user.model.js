@@ -1,34 +1,35 @@
-
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
-const { saltRounds } = require('../helpers/utils/utlis');
+const {saltRounds} = require('../helpers/utils/utlis');
 
 
 const userSchema = new Schema({
     id: Schema.Types.ObjectId,
-    name: { type: String , required: true },
-    surname: { type: String, required: true},
-    username: { type: String, required: true , unique: true},
-    email: { type: String, required: true , match: /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/, unique:true  },
-    password: { type: String , required: true },
-    birth: { type: String, required: true },
-    state: { type: Boolean , default: false },
-    role: { type: Schema.ObjectId , ref:'Role' },
-    token: {type: String, unique: true },
-    createdAt: { type: Date , default: Date.now() },
+    name: {type: String, required: true},
+    surname: {type: String, required: true},
+    username: {type: String, required: true, unique: true},
+    email: {type: String, required: true, match: /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/, unique: true},
+    password: {type: String, required: true},
+    birth: {type: String, required: true},
+    state: {type: Boolean, default: false},
+    role: {type: Schema.ObjectId, ref: 'Role'},
+    token: {type: String, unique: true},
+    code: String,
+    changeState: {type: Boolean, default: false},
+    createdAt: {type: Date, default: Date.now()},
     updatedAt: Date
 });
 
 //auto hash the password
-userSchema.pre('save', function(next){
+userSchema.pre('save', function (next) {
     let user = this;
-    if(!user.isModified('password')) return next();
+    if (!user.isModified('password')) return next();
     //generating salt for bcrypt
-    bcrypt.genSalt(saltRounds,function(err,salt){
+    bcrypt.genSalt(saltRounds, function (err, salt) {
         if (err) return next(err);
-        bcrypt.hash(user.password, salt, function(err,hash){
-            if(err) return next(err);
+        bcrypt.hash(user.password, salt, function (err, hash) {
+            if (err) return next(err);
             user.password = hash;
             next();
         });
@@ -36,4 +37,4 @@ userSchema.pre('save', function(next){
     });
 });
 
-module.exports = mongoose.model('User',userSchema);
+module.exports = mongoose.model('User', userSchema);
